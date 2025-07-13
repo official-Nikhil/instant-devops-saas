@@ -72,6 +72,53 @@ app.get("/api/auth/callback", async (req, res) => {
     res.status(500).send("Authentication failed");
   }
 });
+  app.use(express.json()); // Needed to parse POST JSON body
+
+// Route: Setup CI/CD workflow in selected repo
+app.post("/api/setup-cicd", async (req, res) => {
+  const { token, repoFullName } = req.body;
+
+  if (!token || !repoFullName) {
+    return res.status(400).json({ error: "Missing token or repo name" });
+  }
+
+  const [owner, repo] = repoFullName.split("/");
+
+  const workflowYml = `
+name: CI/CD Pipeline
+on:
+  push:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Node.js app
+        run: echo "Deploying ${repo}"
+`;
+
+  try {
+    await axios.put(
+      `https://api.github.com/repos/${owner}/${repo}/contents/.github/workflows/deploy.yml`,
+      {
+        message: "Add CI/CD workflow",
+        content: Buffer.from(workflowYml).toString("base64"),
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "User-Agent": "instant-devops-saas",
+        },
+      }
+    );
+
+    res.json({ message: `✅ CI/CD workflow added to ${repo}` });
+  } catch (err) {
+    console.error("❌ Failed to setup CI/CD:", err.message);
+    res.status(500).json({ error: "Failed to setup CI/CD" });
+  }
+});
 
 // Start server
 app.listen(3000, '0.0.0.0', () => {

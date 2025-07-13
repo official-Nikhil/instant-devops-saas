@@ -10,7 +10,7 @@ const User = require("./models/User"); // assumes User.js is in ./models
 dotenv.config();
 
 const app = express();
-app.use(cors({ origin: "http://3.93.57.70:5173", credentials: true }));
+app.use(cors({ origin: "http://18.232.78.86:5173", credentials: true }));
 
 // MongoDB connection
 async function connectDB() {
@@ -66,7 +66,7 @@ app.get("/api/auth/callback", async (req, res) => {
     );
 
     // 🔁 Updated with your new EC2 public IP
-    res.redirect(`http://3.93.57.70:5173/dashboard?token=${accessToken}`);
+    res.redirect(`http://18.232.78.86:5173/dashboard?token=${accessToken}`);
   } catch (err) {
     console.error("GitHub auth failed:", err.message);
     res.status(500).send("Authentication failed");
@@ -74,7 +74,7 @@ app.get("/api/auth/callback", async (req, res) => {
 });
 
 // Start server
-app.listen(80, '0.0.0.0', () => {
+app.listen(3000, '0.0.0.0', () => {
   console.log("✅ Backend running on http://0.0.0.0:3000");
 });
 

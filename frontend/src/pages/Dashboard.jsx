@@ -8,35 +8,39 @@ function Dashboard() {
 
   const token = new URLSearchParams(location.search).get("token");
 
-  // Fetch GitHub user profile
+  // Fetch GitHub user info
   useEffect(() => {
-    if (token) {
-      fetch("https://api.github.com/user", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => res.json())
-        .then(setUserData)
-        .catch((err) => console.error("Failed to fetch GitHub user", err));
-    }
+    if (!token) return;
+    fetch("https://api.github.com/user", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => setUserData(data))
+      .catch((err) => console.error("Failed to fetch user:", err));
   }, [token]);
 
-  // Fetch user's repos
+  // Fetch GitHub repos
   useEffect(() => {
-    if (token) {
-      fetch("https://api.github.com/user/repos", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => res.json())
-        .then(setRepos)
-        .catch((err) => console.error("Failed to fetch repos", err));
-    }
+    if (!token) return;
+    fetch("https://api.github.com/user/repos", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => setRepos(data))
+      .catch((err) => console.error("Failed to fetch repos:", err));
   }, [token]);
 
-  // Handle repo selection
-  const handleSelect = (repoFullName) => {
+  // Handle CI/CD setup
+  const handleSetup = (repoFullName) => {
     fetch("http://18.232.78.86:3000/api/setup-cicd", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({ token, repoFullName }),
     })
       .then((res) => res.json())
@@ -47,13 +51,13 @@ function Dashboard() {
   if (!userData) return <div>Loading GitHub profile...</div>;
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Welcome, {userData.login} 👋</h1>
+    <div className="p-4">
+      <h1 className="text-xl font-bold mb-4">Welcome, {userData.login} 👋</h1>
       <img
         src={userData.avatar_url}
         alt="Avatar"
         width="100"
-        className="rounded-full mb-4"
+        className="rounded-full mb-2"
       />
       <p className="mb-6">
         GitHub:{" "}
@@ -67,18 +71,19 @@ function Dashboard() {
         </a>
       </p>
 
-      <h2 className="text-xl font-semibold mb-2">Your Repositories:</h2>
+      <h2 className="text-lg font-semibold mb-2">Your Repositories:</h2>
       {repos.length === 0 ? (
-        <p>No repositories found.</p>
+        <p>Loading repositories or none found...</p>
       ) : (
         <ul className="space-y-2">
           {repos.map((repo) => (
-            <li key={repo.id}>
+            <li key={repo.id} className="flex items-center justify-between">
+              <span>{repo.full_name}</span>
               <button
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                onClick={() => handleSelect(repo.full_name)}
+                className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+                onClick={() => handleSetup(repo.full_name)}
               >
-                🚀 Setup CI/CD for: {repo.full_name}
+                Setup CI/CD
               </button>
             </li>
           ))}

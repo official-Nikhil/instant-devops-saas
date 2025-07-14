@@ -36,7 +36,7 @@ function Dashboard() {
 
   // Handle CI/CD setup
   const handleSetup = (repoFullName) => {
-    fetch("http://18.232.78.86:3000/api/setup-cicd", {
+    fetch("http://3.84.129.53:3000/api/setup-cicd", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

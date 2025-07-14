@@ -99,17 +99,23 @@ jobs:
 `;
 
   try {
-    await axios.put(
-      `https://api.github.com/repos/${owner}/${repo}/contents/.github/workflows/deploy.yml`,
-      {
-        message: "Add CI/CD workflow",
-        content: Buffer.from(workflowYml).toString("base64"),
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "User-Agent": "instant-devops-saas",
-        },
+   await axios.put(
+  `https://api.github.com/repos/${owner}/${repo}/contents/.github/workflows/deploy.yml`,
+  {
+    message: "Add CI/CD workflow",
+    content: Buffer.from(workflowYml).toString("base64"),
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "User-Agent": "instant-devops-saas",
+    },
+    params: {
+      branch: "main", // Explicitly mention the branch
+    },
+  }
+);
+
       }
     );
 

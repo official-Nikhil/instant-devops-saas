@@ -115,8 +115,12 @@ jobs:
 
     res.json({ message: `✅ CI/CD workflow added to ${repo}` });
   } catch (err) {
-    console.error("❌ Failed to setup CI/CD:", err.message);
-    res.status(500).json({ error: "Failed to setup CI/CD" });
+    console.error("❌ CI/CD error:", err.response?.status, err.response?.data || err.message);
+    res.status(500).json({
+  error: "Failed to setup CI/CD",
+  reason: err.response?.data || err.message,
+});
+
   }
 });
 

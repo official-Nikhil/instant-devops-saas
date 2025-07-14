@@ -1,5 +1,5 @@
 // backend/index.js
-//
+
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
@@ -11,6 +11,7 @@ dotenv.config();
 
 const app = express();
 app.use(cors({ origin: "http://3.84.129.53:5173", credentials: true }));
+app.use(express.json()); // Needed to parse POST JSON body
 
 // MongoDB connection
 async function connectDB() {
@@ -65,14 +66,12 @@ app.get("/api/auth/callback", async (req, res) => {
       { upsert: true, new: true }
     );
 
-    // 🔁 Updated with your new EC2 public IP
     res.redirect(`http://3.84.129.53:5173/dashboard?token=${accessToken}`);
   } catch (err) {
     console.error("GitHub auth failed:", err.message);
     res.status(500).send("Authentication failed");
   }
 });
-  app.use(express.json()); // Needed to parse POST JSON body
 
 // Route: Setup CI/CD workflow in selected repo
 app.post("/api/setup-cicd", async (req, res) => {
@@ -99,23 +98,20 @@ jobs:
 `;
 
   try {
-   await axios.put(
-  `https://api.github.com/repos/${owner}/${repo}/contents/.github/workflows/deploy.yml`,
-  {
-    message: "Add CI/CD workflow",
-    content: Buffer.from(workflowYml).toString("base64"),
-  },
-  {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "User-Agent": "instant-devops-saas",
-    },
-    params: {
-      branch: "main", // Explicitly mention the branch
-    },
-  }
-);
-
+    await axios.put(
+      `https://api.github.com/repos/${owner}/${repo}/contents/.github/workflows/deploy.yml`,
+      {
+        message: "Add CI/CD workflow",
+        content: Buffer.from(workflowYml).toString("base64"),
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "User-Agent": "instant-devops-saas",
+        },
+        params: {
+          branch: "main",
+        },
       }
     );
 
@@ -123,15 +119,13 @@ jobs:
   } catch (err) {
     console.error("❌ CI/CD error:", err.response?.status, err.response?.data || err.message);
     res.status(500).json({
-  error: "Failed to setup CI/CD",
-  reason: err.response?.data || err.message,
-});
-
+      error: "Failed to setup CI/CD",
+      reason: err.response?.data || err.message,
+    });
   }
 });
 
 // Start server
-app.listen(3000, '0.0.0.0', () => {
+app.listen(3000, "0.0.0.0", () => {
   console.log("✅ Backend running on http://0.0.0.0:3000");
 });
-

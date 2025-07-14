@@ -12,7 +12,7 @@ function Home() {
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
       <a
-        href="http://18.232.78.86:3000/api/login"
+        href="http://3.84.129.53:3000/api/login"
         className="bg-black text-white px-6 py-3 rounded-lg shadow-md"
       >
         Login with GitHub

@@ -1,0 +1,7 @@
+name: Keep
+on: push
+jobs:
+  no-op:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Keep this folder alive"

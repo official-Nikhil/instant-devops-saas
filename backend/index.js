@@ -1,11 +1,9 @@
-// backend/index.js
-
 const express = require("express");
 const axios = require("axios");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
-const User = require("./models/User"); // assumes User.js is in ./models
+const User = require("./models/User");
 
 dotenv.config();
 
@@ -82,6 +80,7 @@ app.post("/api/setup-cicd", async (req, res) => {
   }
 
   const [owner, repo] = repoFullName.split("/");
+  const filePath = ".github/workflows/deploy.yml";
 
   const workflowYml = `
 name: CI/CD Pipeline
@@ -97,21 +96,46 @@ jobs:
         run: echo "Deploying ${repo}"
 `;
 
+  let sha = null;
+
+  // Step 1: Check if file exists (get sha if it does)
+  try {
+    const existingFile = await axios.get(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "User-Agent": "instant-devops-saas",
+        },
+        params: { branch: "main" },
+      }
+    );
+    sha = existingFile.data.sha;
+    console.log("📄 Existing file found. SHA:", sha);
+  } catch (err) {
+    if (err.response?.status === 404) {
+      console.log("📂 File does not exist, will create new one.");
+    } else {
+      console.error("❌ Error checking file:", err.message);
+      return res.status(500).json({ error: "Failed to check existing file" });
+    }
+  }
+
+  // Step 2: Create or update file
   try {
     await axios.put(
-      `https://api.github.com/repos/${owner}/${repo}/contents/.github/workflows/deploy.yml`,
+      `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`,
       {
         message: "Add CI/CD workflow",
         content: Buffer.from(workflowYml).toString("base64"),
+        ...(sha && { sha }), // only include sha if updating
       },
       {
         headers: {
           Authorization: `Bearer ${token}`,
           "User-Agent": "instant-devops-saas",
         },
-        params: {
-          branch: "main",
-        },
+        params: { branch: "main" },
       }
     );
 

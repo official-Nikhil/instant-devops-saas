@@ -1,7 +1,13 @@
-name: Keep
-on: push
+# keep.yml
+name: Keep Workflow Alive
+
+on:
+  push:
+    branches: [ main ]
+
 jobs:
-  no-op:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Keep this folder alive"
+      - name: Echo
+        run: echo "✅ CI/CD Workflow is working!"

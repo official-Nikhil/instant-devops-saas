@@ -8,7 +8,7 @@ const User = require("./models/User");
 dotenv.config();
 
 const app = express();
-app.use(cors({ origin: "http://3.84.209.104:5173", credentials: true }));
+app.use(cors({ origin: "http://52.91.65.133:5173", credentials: true }));
 app.use(express.json()); // Needed to parse POST JSON body
 
 // MongoDB connection
@@ -64,7 +64,7 @@ app.get("/api/auth/callback", async (req, res) => {
       { upsert: true, new: true }
     );
 
-    res.redirect(`http://3.84.209.104:5173/dashboard?token=${accessToken}`);
+    res.redirect(`http://52.91.65.133:5173/dashboard?token=${accessToken}`);
   } catch (err) {
     console.error("GitHub auth failed:", err.message);
     res.status(500).send("Authentication failed");
